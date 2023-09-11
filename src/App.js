@@ -1,24 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+
+import { useSession } from "./hooks/useSession";
+import { Workers } from "./components/WorkOrders/Workers";
+import { LoginPage } from "./pages/LoginPage";
+import { ArmPage } from "./pages/ArmPage";
+import { PrintLabelPage } from "./pages/PrintLabelPage";
 
 function App() {
+  const [isAuth, setIsAuth] = useState(false);
+  const { getSession } = useSession();
+
+  useEffect(() => {
+    const auth = getSession("session");
+    if (auth) {
+      setIsAuth(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route exact path="/" element={<LoginPage setIsAuth={setIsAuth} />} />
+
+      {isAuth && (
+        <>
+          <Route path="/workers" element={<Workers />} />
+          <Route path="/workers/label" element={<PrintLabelPage />} />
+          <Route path="/arm" element={<ArmPage />} />
+        </>
+      )}
+    </Routes>
   );
 }
 
