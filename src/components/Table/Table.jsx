@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { ModalApp } from "../Modal/ModalApp";
+
 import { Modal } from "../Modal/Modal";
-import { WorkOrderForm } from "../WorkOrderForm/WorkOrderForm";
+import { WorOrderNew } from "../WorkOrderForm/WorOrderNew";
 
 export const Table = ({ data, columns }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dataModal, setDataModal] = useState([]);
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -12,16 +13,11 @@ export const Table = ({ data, columns }) => {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
   return (
     <>
-      <button
-        onClick={openModal}
-        className="float-right bg-green-500 text-white p-2 rounded w-12 h-12 flex items-center justify-center"
-      >
-        <span className="text-xl">+</span>
-      </button>
       <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <WorkOrderForm />
+        <WorOrderNew item={dataModal} />
       </Modal>
       <table className="table-fixed w-[1200px] divide-y divide-gray-200">
         <thead>
@@ -41,14 +37,14 @@ export const Table = ({ data, columns }) => {
             data.map((item, i) => (
               <tr key={i} className={i % 2 === 0 ? "bg-gray-200" : ""}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <button>
+                  <div>
                     <div className="flex justify-between w-[200px]">
                       <div className="text-lg font-semibold">{item.number}</div>
-                      <div>
-                        <ModalApp item={item} />
+                      <div onClick={openModal}>
+                        <button onClick={() => setDataModal(item)}>✏️</button>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 </td>
                 <td className="px-6 py-4 ">
                   {item.start_date ? item.start_date : "Нет"}

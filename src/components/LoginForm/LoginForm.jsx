@@ -1,20 +1,15 @@
 import React from "react";
 
-const LoginForm = ({
-  data,
-  handleSubmit,
-  handleInputChange,
-  isError = false,
-}) => {
+const LoginForm = ({ data, handleSubmit, handleInputChange, isError }) => {
   return (
     <>
       <div
         className={`flex flex-col w-1/4 h-80 mx-auto my-44 items-center bg-white border ${
-          isError ? " border-red-600" : ""
+          isError.status ? " border-red-600" : ""
         } rounded-lg drop-shadow-xl`}
       >
         <h2 className="text-xl font-bold my-3">
-          {isError ? "Неверные учетные данные" : "Авторизуйтесь"}
+          {isError.status ? isError.err_message : "Авторизуйтесь"}
         </h2>
         <div className="w-full border-b-2 mb-8"></div>
         <form className="flex flex-col gap-2" onSubmit={handleSubmit}>

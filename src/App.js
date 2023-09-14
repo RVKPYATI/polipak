@@ -6,6 +6,7 @@ import { Workers } from "./components/WorkOrders/Workers";
 import { LoginPage } from "./pages/LoginPage";
 import { ArmPage } from "./pages/ArmPage";
 import { PrintLabelPage } from "./pages/PrintLabelPage";
+import { MyProvider } from "./DataContext";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
@@ -13,6 +14,7 @@ function App() {
 
   useEffect(() => {
     const auth = getSession("session");
+
     if (auth) {
       setIsAuth(true);
     }
@@ -20,17 +22,19 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route exact path="/" element={<LoginPage setIsAuth={setIsAuth} />} />
+    <MyProvider>
+      <Routes>
+        <Route exact path="/" element={<LoginPage setIsAuth={setIsAuth} />} />
 
-      {isAuth && (
-        <>
-          <Route path="/workers" element={<Workers />} />
-          <Route path="/workers/label" element={<PrintLabelPage />} />
-          <Route path="/arm" element={<ArmPage />} />
-        </>
-      )}
-    </Routes>
+        {isAuth && (
+          <>
+            <Route path="/workers" element={<Workers />} />
+            <Route path="/workers/label" element={<PrintLabelPage />} />
+            <Route path="/arm" element={<ArmPage />} />
+          </>
+        )}
+      </Routes>
+    </MyProvider>
   );
 }
 

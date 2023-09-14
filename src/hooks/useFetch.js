@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 
 function useFetch() {
-  const [error, setError] = useState(null);
+  const [errorFetch, setError] = useState(null);
 
   const fetchData = async (
     url,
@@ -29,11 +29,11 @@ function useFetch() {
 
       return response;
     } catch (err) {
-      setError(err);
+      setError(err.response);
     }
   };
 
-  return { error, fetchData };
+  return { errorFetch, fetchData };
 }
 
 export default useFetch;

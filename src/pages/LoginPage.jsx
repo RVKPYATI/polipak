@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import { LoginForm } from "../components/LoginForm/LoginForm";
-import useFetch from "../hooks/useFetch";
 import { useSession } from "../hooks/useSession";
 import { authURI } from "../constants/endpoints";
 
 export const LoginPage = ({ setIsAuth }) => {
   const [formData, setFormData] = useState({ username: "", password: "" });
-  const [isError, setIsError] = useState(false);
-  const { fetchData } = useFetch();
+  const [isError, setIsError] = useState({ status: false, err_message: "" });
   const { setSession } = useSession();
   const navigate = useNavigate();
 
@@ -29,19 +28,33 @@ export const LoginPage = ({ setIsAuth }) => {
     };
 
     try {
-      const response = await fetchData(authURI, "POST", requestData);
+      const response = await axios.post(authURI, requestData);
 
-      if (response.status === 200) {
+      if (response && response.status === 200) {
         const tokenSession = "Token " + response.data.token;
-
         setSession("session", tokenSession);
         setSession("name", formData.username);
         setIsAuth(true);
         navigate("/workers");
+      } else {
+        console.error("Ошибка:", response.status);
       }
     } catch (error) {
-      setIsError(true);
-      console.error("Ошибка авторизации:", error);
+      console.log(error);
+      if (error.code === "ERR_NETWORK") {
+        // Обработка ошибки "сервер недоступен"
+        setIsError({ status: true, err_message: "Сервер недоступен" });
+        console.error(
+          "Сервер недоступен. Проверьте ваше подключение к интернету."
+        );
+      } else if (error.response && error.response.status === 400) {
+        setIsError({ status: true, err_message: "Неверные учетные данные" });
+        console.error("Ошибка 400. Неверный запрос.");
+      } else {
+        // Обработка других ошибок
+        setIsError(true);
+        console.error("Ошибка:", error.message);
+      }
     }
   };
 

@@ -4,6 +4,7 @@ import { useReactToPrint } from "react-to-print";
 import { workordersURI } from "../../constants/endpoints";
 import useFetch from "../../hooks/useFetch";
 import PrintLabel from "../PrintLabel/PrintLabel";
+import { useMyContext } from "../../DataContext";
 
 export const ArmOrderForm = ({ id, token }) => {
   const { fetchData } = useFetch();
@@ -15,6 +16,8 @@ export const ArmOrderForm = ({ id, token }) => {
   const [formData, setFormData] = useState({
     weight: "",
   });
+
+  const { dataContext, updateData } = useMyContext();
 
   useEffect(() => {
     try {
@@ -50,6 +53,8 @@ export const ArmOrderForm = ({ id, token }) => {
         formData,
         token
       );
+
+      updateData([...dataContext, response.data]);
       setDataForPrint({
         response: response.data,
         currentWorkOrder,

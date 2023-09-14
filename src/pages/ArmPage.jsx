@@ -7,15 +7,16 @@ import { ArmOrderForm } from "../components/ArmOrderForm/ArmOrderForm";
 import { formatDate } from "../tools/formatDate";
 import { Modal } from "../components/Modal/Modal";
 import Navbar from "../components/Navbar/Navbar";
+import { useMyContext } from "../DataContext";
 
 export const ArmPage = () => {
   const [data, setData] = useState([]);
-  const [dataProduct, setDataProduct] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
 
   const { getSession } = useSession();
   const { fetchData } = useFetch();
   const token = getSession("session");
+  const { dataContext, updateData } = useMyContext();
 
   useEffect(() => {
     const getData = async () => {
@@ -25,6 +26,7 @@ export const ArmPage = () => {
     };
 
     getData();
+    updateData([]);
   }, []);
 
   const getDataId = async (id) => {
@@ -36,8 +38,7 @@ export const ArmPage = () => {
         token
       );
       const data = await response.data;
-
-      setDataProduct(data);
+      updateData(data);
     } catch (error) {
       console.error("Произошла ошибка", error);
     }
@@ -100,7 +101,7 @@ export const ArmPage = () => {
             <ArmOrderForm id={selectedOption} token={token} />
           </Modal>
         </div>
-        {dataProduct.length > 0 ? (
+        {dataContext.length > 0 ? (
           <table className="w-[1100px] divide-y divide-gray-200">
             <thead>
               <tr>
@@ -116,7 +117,7 @@ export const ArmPage = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {dataProduct.map((item, i) => (
+              {dataContext.map((item, i) => (
                 <tr key={i} className={i % 2 === 0 ? "bg-gray-200" : ""}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-lg font-semibold">{item.serial}</div>

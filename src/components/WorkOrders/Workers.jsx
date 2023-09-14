@@ -6,6 +6,8 @@ import useFetch from "../../hooks/useFetch";
 import { useSession } from "../../hooks/useSession";
 import { workordersURI } from "../../constants/endpoints";
 import Navbar from "../Navbar/Navbar";
+import { Modal } from "../Modal/Modal";
+import { WorkOrderForm } from "../WorkOrderForm/WorkOrderForm";
 
 export const Workers = () => {
   const [data, setData] = useState([]);
@@ -20,9 +22,11 @@ export const Workers = () => {
   const [query, setQuery] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [page, setPage] = useState(1);
+  const [pageCounts, setPageCounts] = useState();
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
+    setSelectedOption(`?page=${newPage}`);
   };
 
   const handleOptionChange = (e) => {
@@ -39,20 +43,29 @@ export const Workers = () => {
     setQuery("");
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
     try {
       const getData = async () => {
         const token = getSession("session");
 
         const newData = await fetchData(
-          workordersURI + selectedOption + "?page=" + page,
+          workordersURI + selectedOption,
           "GET",
           null,
           token
         );
 
         const results = await newData.data.results;
-
+        setPageCounts(newData.data.count);
         setData(results);
       };
       getData();
@@ -99,6 +112,15 @@ export const Workers = () => {
           <option value="1">Все</option>
           <option value="2">Завершен</option>
         </select>
+        <button
+          onClick={openModal}
+          className="float-right bg-green-500 text-white p-2 rounded w-12 h-12 flex items-center justify-center"
+        >
+          <span className="text-xl">+</span>
+        </button>
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+          <WorkOrderForm />
+        </Modal>
         <Table data={data} columns={columns} />
         <div className="flex justify-center gap-2 items-center">
           <button
@@ -108,11 +130,11 @@ export const Workers = () => {
           >
             {"<< Назад"}
           </button>
-          <div>{`Страница ${page} из ${data.length / 10 + 1}`}</div>
+          <div>{`Страница ${page} из ${Math.floor(pageCounts / 10 + 1)}`}</div>
           <button
             className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
             onClick={() => handlePageChange(page + 1)}
-            disabled={page === data.length / 10 + 1}
+            disabled={page === Math.floor(pageCounts / 10 + 1)}
           >
             {"Вперед >>"}
           </button>

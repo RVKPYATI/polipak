@@ -4,7 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import { useSession } from "../../hooks/useSession";
 import { nomenclaturesURI, workordersURI } from "../../constants/endpoints";
 
-export const WorkOrderForm = () => {
+export const WorOrderNew = ({ item }) => {
   const [dataNomenclatures, setDataNomenclatures] = useState([]);
   const [flag, setFlag] = useState(false);
   const { getSession } = useSession();
@@ -12,23 +12,16 @@ export const WorkOrderForm = () => {
   const token = getSession("session");
 
   const [formData, setFormData] = useState({
-    number: "",
-    start_date: undefined,
-    is_finished: false,
-    material: {
-      material_code: "",
-      material_name: "",
-    },
-    product: {
-      product_code: "",
-      product_name: "",
-    },
+    number: item.number,
+    start_date: item.start_date,
+    is_finished: item.is_finished,
+    material: item.material.id,
+    product: item.product.id,
   });
 
   useEffect(() => {
     const getnomenclatures = async () => {
       const newData = await fetchData(nomenclaturesURI, "GET", null, token);
-
       setDataNomenclatures(newData.data.results);
     };
     getnomenclatures();
@@ -49,28 +42,36 @@ export const WorkOrderForm = () => {
       }));
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await fetchData(workordersURI, "POST", formData, token);
 
+    try {
+      const response = await fetchData(
+        `${workordersURI}${item.id}/`,
+        "PATCH",
+        formData,
+        token
+      );
+
+      console.log("Данные успешно сохранены", response.data);
       setFlag(true);
     } catch (error) {
       console.error(error);
     }
   };
-
   return (
     <form action="">
       <table className="table-fixed w-[1000px] text-left">
         <tbody>
           <tr>
-            <td className="border px-4 py-2">
-              Номер <strong className="text-xs">*</strong>
-            </td>
+            <td className="border px-4 py-2">ID</td>
+            <td className="border px-4 py-2">{item.id}</td>
+          </tr>
+          <tr>
+            <td className="border px-4 py-2">Номер</td>
             <td className="border px-4 py-2">
               <input
-                required
                 className="border-2"
                 type="text"
                 name="number"
@@ -85,55 +86,57 @@ export const WorkOrderForm = () => {
               <input
                 className="border-2"
                 type="date"
-                value={formData.start_date}
+                value={formData.start_date ? formData.start_date : ""}
                 name="start_date"
                 onChange={handleChange}
               />
             </td>
           </tr>
-
-          <tr>
-            <td className="border px-4 py-2">
-              Сырье <strong className="text-xs">*</strong>
-            </td>
-            <td className="border px-4 py-2">
-              <select required name="material" onChange={handleChange}>
-                <option value="">Выбрать</option>
-                {dataNomenclatures.map((item, i) => (
-                  <option
-                    key={i}
-                    value={item.id}
-                  >{`${item.code} - ${item.name}`}</option>
-                ))}
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td className="border px-4 py-2">
-              Продукция <strong className="text-xs">*</strong>
-            </td>
-            <td className="border px-4 py-2">
-              <select required name="product" onChange={handleChange}>
-                <option value="">Выбрать</option>
-                {dataNomenclatures.map((item, i) => (
-                  <option
-                    key={i}
-                    value={item.id}
-                  >{`${item.code} - ${item.name}`}</option>
-                ))}
-              </select>
-            </td>
-          </tr>
           <tr>
             <td className="border px-4 py-2">Завершен</td>
             <td className="border px-4 py-2">
-              <input
-                type="checkbox"
-                onChange={handleChange}
+              <select
                 name="is_finished"
-                id=""
-                checked={formData.is_finished}
-              />
+                value={formData.is_finished}
+                onChange={handleChange}
+              >
+                <option value="true">✔️</option>
+                <option value="false">❌</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td className="border px-4 py-2">Сырье</td>
+            <td className="border px-4 py-2">
+              <select name="material" onChange={handleChange}>
+                <option
+                  value={item.material.id}
+                >{`${item.material.code} - ${item.material.name}`}</option>
+                {dataNomenclatures &&
+                  dataNomenclatures.map((item, i) => (
+                    <option
+                      key={item.id}
+                      value={`${item.id}`}
+                    >{`${item.code} - ${item.name}`}</option>
+                  ))}
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td className="border px-4 py-2">Продукция</td>
+            <td className="border px-4 py-2">
+              <select name="product" onChange={handleChange}>
+                <option
+                  value={item.product.id}
+                >{`${item.product.code} - ${item.product.name}`}</option>
+                {dataNomenclatures &&
+                  dataNomenclatures.map((item, i) => (
+                    <option
+                      key={i}
+                      value={`${item.id}`}
+                    >{`${item.code} - ${item.name}`}</option>
+                  ))}
+              </select>
             </td>
           </tr>
         </tbody>
@@ -142,15 +145,10 @@ export const WorkOrderForm = () => {
         <button
           onClick={handleSubmit}
           className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 mt-2 rounded"
-          disabled={formData.number === ""}
         >
           Сохранить
         </button>
-        {flag ? (
-          <div className="text-green-500 mt-2">Данные успешно сохранены</div>
-        ) : (
-          ""
-        )}
+        <div>{flag ? "Данные успешно сохранены" : ""}</div>
       </div>
     </form>
   );
